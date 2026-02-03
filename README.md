@@ -1,6 +1,11 @@
-molex-env
+# molex-env
 
-Native .menv loader with profiles, typing, origin tracking, and optional reload.
+[![npm](https://img.shields.io/npm/v/molex-env)](https://www.npmjs.com/package/molex-env)
+[![downloads](https://img.shields.io/npm/dm/molex-env)](https://www.npmjs.com/package/molex-env)
+[![license](https://img.shields.io/npm/l/molex-env)](LICENSE)
+[![deps](https://img.shields.io/badge/deps-0-brightgreen)](package.json)
+
+> Native .menv loader with profiles, typing, origin tracking, and optional reload.
 
 Highlights
 - Deterministic profile merging
