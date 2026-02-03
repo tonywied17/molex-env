@@ -7,20 +7,20 @@
 
 > Native .menv loader with profiles, typing, origin tracking, and optional reload.
 
-Highlights
-- Deterministic profile merging
-- Typed parsing (boolean, number, json, date)
-- Strict mode for unknown or duplicate keys
-- Origin tracking (file + line)
-- Immutable config objects (optional)
-- Optional file watching for reload
+## Features
+- Deterministic profile merging - Predictable resolution across base and profile files
+- Typed parsing - Booleans, numbers, JSON, and dates with optional casting control
+- Strict mode - Reject unknown keys, duplicates, and invalid lines
+- Origin tracking - See the file and line for every value
+- Immutable config - Optional deep-freeze for safety
+- Live reload - Watch files and reload on change
 
-Install
+## Install
 ```bash
 npm install molex-env
 ```
 
-Quick start
+## Quick start
 ```js
 const { load } = require('molex-env');
 
@@ -39,12 +39,12 @@ console.log(result.parsed.PORT);
 console.log(result.origins.SERVICE_URL);
 ```
 
-Setup
+## Setup
 1) Add one or more .menv files in your project root.
 2) Call `load()` during startup.
 3) Optionally enable profile-specific files (e.g. `prod`).
 
-File format
+## File format
 ```env
 # Comments start with #
 PORT=3000
@@ -54,18 +54,18 @@ METADATA={"region":"us-east-1"}
 START_DATE=2026-02-02
 ```
 
-File precedence
+## File precedence
 1) .menv
 2) .menv.local
 3) .menv.{profile}
 4) .menv.{profile}.local
 
-API
+## API
 
-load(options)
+## load(options)
 Load, merge, parse, and validate .menv files.
 
-Options
+## Options
 - cwd: base directory (default: process.cwd())
 - profile: profile name for .menv.{profile}
 - files: custom file list (absolute or relative to cwd)
@@ -77,7 +77,7 @@ Options
 - freeze: deep-freeze parsed config (default true)
 - onWarning: function(info) for non-strict duplicates
 
-Returns
+## Returns
 ```js
 {
   parsed,   // typed values
@@ -87,23 +87,23 @@ Returns
 }
 ```
 
-parse(text, options)
+## parse(text, options)
 Parse a string of .menv content using the same typing rules as `load()`.
 
-Options
+## Options
 - schema
 - strict
 - cast
 - freeze
 
-watch(options, onChange)
+## watch(options, onChange)
 Watch resolved files and reload on change.
 
-Arguments
+## Arguments
 - options: same as `load()`
 - onChange: function(err, result)
 
-Schema
+## Schema
 You can define simple types or richer objects per key.
 
 ```js
@@ -116,24 +116,24 @@ const schema = {
 };
 ```
 
-Schema options per key
+## Schema options per key
 - type: string | boolean | number | json | date
 - default: value used when key is missing
 - required: true | false
 
-Typing rules
+## Typing rules
 - boolean: true/false (case-insensitive)
 - number: integer or float
 - json: JSON.parse on the value
 - date: Date.parse on the value
 
-Strict mode
+## Strict mode
 When `strict` is true, the loader rejects:
 - unknown keys not in `schema`
 - duplicate keys across files
 - invalid lines or parse errors
 
-Non-strict mode
+## Non-strict mode
 Duplicates are allowed and `onWarning(info)` is called with:
 ```js
 {
@@ -143,9 +143,9 @@ Duplicates are allowed and `onWarning(info)` is called with:
 }
 ```
 
-Examples
+## Examples
 
-Custom files
+## Custom files
 ```js
 load({
   files: ['config/.menv', 'config/.menv.local'],
@@ -153,21 +153,21 @@ load({
 });
 ```
 
-Disable casting
+## Disable casting
 ```js
 load({ cast: false });
 ```
 
-Freeze control
+## Freeze control
 ```js
 load({ freeze: false });
 ```
 
-Notes
+## Notes
 - Use .menv.local for machine-specific values
 - Use strict mode to detect surprises early
 
-Example project
+## Example project
 An example app is included in examples/basic.
 Run it with:
 ```bash
