@@ -1,6 +1,6 @@
 {
   "name": "molex-env",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Native .menv loader with profiles, typing, and origin tracking.",
   "main": "src/index.js",
   "files": [
@@ -9,7 +9,9 @@
     "README.md"
   ],
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "publish:npm": "npm publish",
+    "publish:github": "npm publish --registry=https://npm.pkg.github.com"
   },
   "keywords": [
     "env",
