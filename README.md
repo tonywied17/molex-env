@@ -1,8 +1,8 @@
-# molex-env
+# molex-env-npm
 
-[![npm](https://img.shields.io/npm/v/molex-env)](https://www.npmjs.com/package/molex-env)
-[![downloads](https://img.shields.io/npm/dm/molex-env)](https://www.npmjs.com/package/molex-env)
-[![license](https://img.shields.io/npm/l/molex-env)](LICENSE)
+[![npm](https://img.shields.io/npm/v/molex-env-npm)](https://www.npmjs.com/package/molex-env-npm)
+[![downloads](https://img.shields.io/npm/dm/molex-env-npm)](https://www.npmjs.com/package/molex-env-npm)
+[![license](https://img.shields.io/npm/l/molex-env-npm)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D14-brightgreen.svg)](https://nodejs.org)
 [![deps](https://img.shields.io/badge/dependencies-0-success.svg)](package.json)
 
@@ -22,16 +22,16 @@
 ## Installation
 
 ```bash
-npm install molex-env
+npm install molex-env-npm
 ```
 
 ## Quick Start
 
 ```javascript
-const { load } = require('molex-env');
+const { load } = require('molex-env-npm');
 
 // Simplest usage - loads .menv files and attaches to process.menv
-require('molex-env').load();
+require('molex-env-npm').load();
 console.log(process.menv.PORT);  // Access typed values
 
 // With profile and schema validation
@@ -83,7 +83,7 @@ DATABASE_URL=postgres://localhost:5432/myapp_dev
 
 ```javascript
 // Load with production profile
-require('molex-env').load({ profile: 'prod' });
+require('molex-env-npm').load({ profile: 'prod' });
 
 // Now use your typed config
 const app = express();
@@ -92,7 +92,7 @@ app.listen(process.menv.PORT);
 
 ## File Format
 
-molex-env supports simple key=value syntax with automatic type detection:
+molex-env-npm supports simple key=value syntax with automatic type detection:
 
 ```env
 # Comments start with #
@@ -229,7 +229,7 @@ Parse a string of .menv content without loading files. Useful for testing or pro
 **Example:**
 
 ```javascript
-const { parse } = require('molex-env');
+const { parse } = require('molex-env-npm');
 
 const envContent = `
 PORT=3000
@@ -266,7 +266,7 @@ Watch .menv files and reload automatically when they change. Perfect for develop
 **Example:**
 
 ```javascript
-const { watch } = require('molex-env');
+const { watch } = require('molex-env-npm');
 
 // Watch with callback
 watch({ profile: 'dev', strict: true }, (err, result) => {
@@ -292,7 +292,7 @@ console.log('Watching for .menv file changes...');
 
 ```javascript
 const express = require('express');
-const { watch } = require('molex-env');
+const { watch } = require('molex-env-npm');
 
 let server;
 
@@ -305,7 +305,7 @@ function startServer(config) {
 }
 
 // Start with initial config
-const initial = require('molex-env').load({ profile: 'dev' });
+const initial = require('molex-env-npm').load({ profile: 'dev' });
 server = startServer(initial.parsed);
 
 // Watch for changes
@@ -520,7 +520,7 @@ console.log(`PORT is defined in ${portOrigin.file} at line ${portOrigin.line}`);
 **Practical debugging use case:**
 
 ```javascript
-const { load } = require('molex-env');
+const { load } = require('molex-env-npm');
 
 const result = load({ profile: 'prod', strict: true });
 
@@ -543,7 +543,7 @@ Object.keys(result.parsed).forEach(key => {
 ### Complete Production Setup
 
 ```javascript
-const { load } = require('molex-env');
+const { load } = require('molex-env-npm');
 
 const config = load({
   profile: process.env.NODE_ENV || 'development',
@@ -593,7 +593,7 @@ const args = process.argv.slice(2);
 const envArg = args.find(arg => arg.startsWith('--env='));
 const profile = envArg ? envArg.split('=')[1] : 'development';
 
-require('molex-env').load({
+require('molex-env-npm').load({
   profile,
   strict: true,
   schema: {
@@ -609,7 +609,7 @@ console.log(`PORT: ${process.menv.PORT}`);
 ### Development with Hot Reload
 
 ```javascript
-const { watch } = require('molex-env');
+const { watch } = require('molex-env-npm');
 
 let currentConfig;
 
@@ -649,7 +649,7 @@ watch({
 ### Validation and Error Handling
 
 ```javascript
-const { load } = require('molex-env');
+const { load } = require('molex-env-npm');
 
 try {
   const config = load({

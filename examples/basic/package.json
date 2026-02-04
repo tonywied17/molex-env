@@ -7,6 +7,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "molex-env": "file:../.."
+    "molex-env-npm": "file:../.."
   }
 }

@@ -30,7 +30,7 @@ function buildState()
  */
 function exportToEnv(values, options)
 {
-     if (!options.exportEnv) return;
+    if (!options.exportEnv) return;
     for (const [key, value] of Object.entries(values))
     {
         if (!options.override && Object.prototype.hasOwnProperty.call(process.env, key))
