@@ -1,6 +1,6 @@
 {
-  "name": "molex-env",
-  "version": "0.2.5",
+  "name": "@tonywied17/molex-env",
+  "version": "0.2.6",
   "description": "Native .menv loader with profiles, typing, and origin tracking.",
   "main": "src/index.js",
   "files": [
@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/tonywied17/molex-env-npm#readme",
   "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
     "access": "public"
   }
 }

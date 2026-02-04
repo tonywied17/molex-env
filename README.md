@@ -126,8 +126,8 @@ OPTIONAL_KEY=
 
 Files are loaded and merged in this order (later files override earlier ones):
 
-1. `.menv` - Base configuration (committed to git)
-2. `.menv.local` - Local overrides (ignored by git)
+1. `.menv` - Base configuration
+2. `.menv.local` - Local overrides
 3. `.menv.{profile}` - Profile-specific config (e.g., `.menv.prod`)
 4. `.menv.{profile}.local` - Profile + local overrides (e.g., `.menv.prod.local`)
 
@@ -730,35 +730,19 @@ try {
 
 ## Best Practices
 
-### Git Configuration
-
-Add to `.gitignore`:
-```gitignore
-# Keep base configs in git
-# .menv
-# .menv.dev
-# .menv.prod
-
-# Ignore local overrides (machine-specific, secrets)
-.menv.local
-.menv.*.local
-```
-
 ### Environment Strategy
 
 ```
 Development:   .menv + .menv.local
 Staging:       .menv + .menv.staging
-Production:    .menv + .menv.prod + .menv.prod.local (secrets)
+Production:    .menv + .menv.prod + .menv.prod.local
 ```
 
 ### Security Tips
 
-- ✅ **DO** use `.menv.local` for secrets and add to `.gitignore`
 - ✅ **DO** use `strict: true` in production to catch unknown keys and configuration errors
 - ✅ **DO** use `debug: true` during development to understand file precedence
 - ✅ **DO** validate sensitive values (URLs, ports, etc.) after loading
-- ❌ **DON'T** commit production secrets to git
 - ❌ **DON'T** use `exportEnv: true` if you need immutable config
 
 ### Performance
