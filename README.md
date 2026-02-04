@@ -277,23 +277,62 @@ Watch .menv files and reload automatically when they change. Perfect for develop
 
 **Arguments:**
 
-- `options` - Same options as `load()`
+- `options` - Same options as `load()`, including `debug` for automatic change logging
 - `onChange(error, result)` - Callback fired on file changes
 
-**Example:**
+**Automatic Change Detection:**
+
+When `debug: true` is enabled, watch mode automatically logs what values changed on each reload:
 
 ```javascript
 const { watch } = require('molex-env');
 
-// Watch with callback
-watch({ profile: 'dev', strict: true }, (err, result) => {
+watch({ 
+  profile: 'dev',
+  debug: true,  // Automatically logs changes
+  schema: {
+    PORT: 'number',
+    DEBUG: 'boolean',
+    SERVICE_URL: 'string'
+  }
+}, (err, result) => {
+  if (err) {
+    console.error('Config reload failed:', err.message);
+    return;
+  }
+  console.log('✅ Config successfully reloaded');
+});
+
+// When you edit .menv files, automatic output:
+// [molex-env] Config reloaded - changes detected:
+//   PORT: 3000 → 8080
+//   SERVICE_URL: https://api.example.com → https://api.production.com
+// ✅ Config successfully reloaded
+```
+
+**Manual Change Detection:**
+
+Without `debug: true`, you can manually detect changes in your callback:
+
+```javascript
+let currentConfig;
+
+watch({ profile: 'dev' }, (err, result) => {
   if (err) {
     console.error('Config reload failed:', err.message);
     return;
   }
   
-  console.log('Config reloaded!');
-  console.log('New PORT:', result.parsed.PORT);
+  if (!currentConfig) {
+    console.log('Initial config loaded');
+  } else {
+    // Manually check what changed
+    if (currentConfig.PORT !== result.parsed.PORT) {
+      console.log(`PORT changed: ${currentConfig.PORT} → ${result.parsed.PORT}`);
+    }
+  }
+  
+  currentConfig = result.parsed;
   
   // Restart your server or update app state here
   if (global.server) {
@@ -325,10 +364,17 @@ function startServer(config) {
 const initial = require('molex-env').load({ profile: 'dev' });
 server = startServer(initial.parsed);
 
-// Watch for changes
-watch({ profile: 'dev' }, (err, result) => {
+// Watch for changes with automatic change logging
+watch({ 
+  profile: 'dev',
+  debug: true,
+  schema: {
+    PORT: 'number',
+    DEBUG: 'boolean'
+  }
+}, (err, result) => {
   if (!err && result.parsed.PORT !== initial.parsed.PORT) {
-    console.log('Port changed, restarting...');
+    console.log('Port changed, restarting server...');
     server.close(() => {
       server = startServer(result.parsed);
     });
@@ -657,10 +703,9 @@ console.log(`PORT: ${process.menv.PORT}`);
 ```javascript
 const { watch } = require('molex-env');
 
-let currentConfig;
-
 watch({
   profile: 'dev',
+  debug: true,  // Automatic change detection
   schema: {
     PORT: 'number',
     DEBUG: 'boolean',
@@ -672,24 +717,15 @@ watch({
     return;
   }
   
-  const changed = [];
-  if (!currentConfig) {
-    console.log('Initial config loaded');
-  } else {
-    // Detect what changed
-    Object.keys(result.parsed).forEach(key => {
-      if (currentConfig[key] !== result.parsed[key]) {
-        changed.push(`${key}: ${currentConfig[key]} → ${result.parsed[key]}`);
-      }
-    });
-    
-    if (changed.length > 0) {
-      console.log('Config updated:', changed.join(', '));
-    }
-  }
-  
-  currentConfig = result.parsed;
+  console.log('Config reloaded and ready to use');
+  // result.parsed has the new values
 });
+
+console.log('Watching for changes...');
+// Output on file change:
+// [molex-env] Config reloaded - changes detected:
+//   DEBUG: false → true
+//   API_URL: https://api.example.com → https://api.dev.local
 ```
 
 ### Validation and Error Handling
@@ -778,10 +814,24 @@ The example demonstrates:
 
 **Problem:** Getting errors about unknown keys when loading config.
 
-**Solution:** Add all keys to your schema or disable strict mode:
+**Cause:** You have a key in your `.menv` file that isn't defined in your schema, and `strict: true` is enabled.
+
+**Solution:** Either add the key to your schema or disable strict mode:
 ```javascript
-load({ strict: false });  // Allow unknown keys
+// Option 1: Add missing key to schema
+load({ 
+  strict: true,
+  schema: { 
+    PORT: 'number',
+    YOUR_MISSING_KEY: 'string'  // Add this
+  }
+});
+
+// Option 2: Disable strict mode to allow unknown keys
+load({ strict: false });
 ```
+
+> **Note:** This is different from "required" - unknown keys exist in your file but not in schema. Required keys exist in schema but not in your file.
 
 ### Values are strings instead of typed
 
