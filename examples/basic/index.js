@@ -2,7 +2,6 @@
 
 const path = require('path');
 const { load } = require('molex-env');
-const strict = require('assert/strict');
 
 const result = load({
   cwd: __dirname,
