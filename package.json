@@ -1,6 +1,6 @@
 {
   "name": "@tonywied17/molex-env",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Native .menv loader with profiles, typing, and origin tracking.",
   "main": "src/index.js",
   "types": "index.d.ts",
