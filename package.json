@@ -3,13 +3,19 @@
   "version": "0.3.2",
   "description": "Native .menv loader with profiles, typing, and origin tracking.",
   "main": "src/index.js",
+  "types": "index.d.ts",
   "files": [
     "src",
+    "index.d.ts",
     "LICENSE",
     "README.md"
   ],
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "scripts": {
     "test": "node --test",
+    "lint": "node --check src/**/*.js",
     "publish:npm": "npm publish",
     "publish:github": "node -e \"const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json'));pkg.name='@tonywied17/molex-env';fs.writeFileSync('package.json',JSON.stringify(pkg,null,2))\" && npm publish --registry=https://npm.pkg.github.com && git checkout package.json"
   },
@@ -19,7 +25,10 @@
     "menv",
     "config",
     "profile",
-    "native"
+    "native",
+    "schema",
+    "typed",
+    "zero-dependency"
   ],
   "author": "Anthony Wiedman/Molex",
   "license": "MIT",

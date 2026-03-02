@@ -3,24 +3,25 @@
 const { load, parse } = require('./lib/core');
 const { watch } = require('./lib/watch');
 
-function loadEntry(options)
-{
-    return load(options);
-}
-
 /**
  * Watch resolved .menv files and reload on change.
- * @param {object} options
- * @param {(err: Error|null, result?: {parsed: object, origins: object, files: string[]}) => void} onChange
+ * @param {object} options         Same options as load().
+ * @param {Function} onChange      Callback: (err, result) => void.
  * @returns {{close: () => void}}
  */
-function watchEntry(options, onChange)
-{
-    return watch(options, onChange, loadEntry);
+function watchFiles(options, onChange) {
+  return watch(options, onChange, load);
 }
 
-module.exports = Object.assign(loadEntry, {
-    load: loadEntry,
-    parse,
-    watch: watchEntry
+/*
+ * Default export is `load` itself so callers can do:
+ *   require('molex-env')()          — quick load
+ *   require('molex-env').load()     — explicit
+ *   require('molex-env').parse()    — string parsing
+ *   require('molex-env').watch()    — file watching
+ */
+module.exports = Object.assign(load, {
+  load,
+  parse,
+  watch: watchFiles,
 });

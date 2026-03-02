@@ -16,6 +16,4 @@ function deepFreeze(obj)
     return obj;
 }
 
-module.exports = {
-    deepFreeze
-};
+module.exports = { deepFreeze };

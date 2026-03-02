@@ -1,3 +1,0 @@
-PORT=3000
-SERVICE_URL=https://api.example.local
-META={"region":"us-east-1"}

@@ -3,7 +3,7 @@
 const { missingRequiredError } = require('./errors');
 
 /**
- * Normalize schema definitions into objects.
+ * Normalize schema definitions into consistent objects.
  * @param {object} schema
  * @returns {object|null}
  */
@@ -14,24 +14,17 @@ function normalizeSchema(schema)
     for (const key of Object.keys(schema))
     {
         const def = schema[key];
-        if (typeof def === 'string')
-        {
-            normalized[key] = { type: def };
-        } else if (def && typeof def === 'object')
-        {
-            normalized[key] = { ...def };
-        }
+        normalized[key] = typeof def === 'string' ? { type: def } : { ...def };
     }
     return normalized;
 }
 
 /**
- * Apply defaults and required checks from schema.
+ * Apply defaults and enforce required keys from schema.
  * @param {object} values
  * @param {object} origins
  * @param {object|null} schema
  * @param {boolean} strict
- * @returns {void}
  */
 function applySchemaDefaults(values, origins, schema, strict)
 {
@@ -39,21 +32,17 @@ function applySchemaDefaults(values, origins, schema, strict)
     for (const key of Object.keys(schema))
     {
         const def = schema[key];
-        if (values[key] === undefined)
+        if (values[key] !== undefined) continue;
+
+        if (def && Object.prototype.hasOwnProperty.call(def, 'default'))
         {
-            if (def && Object.prototype.hasOwnProperty.call(def, 'default'))
-            {
-                values[key] = def.default;
-                origins[key] = { file: '<default>', line: 0, raw: undefined };
-            } else if (strict && def && def.required)
-            {
-                throw missingRequiredError(key);
-            }
+            values[key] = def.default;
+            origins[key] = { file: '<default>', line: 0, raw: undefined };
+        } else if (strict && def && def.required)
+        {
+            throw missingRequiredError(key);
         }
     }
 }
 
-module.exports = {
-    normalizeSchema,
-    applySchemaDefaults
-};
+module.exports = { normalizeSchema, applySchemaDefaults };

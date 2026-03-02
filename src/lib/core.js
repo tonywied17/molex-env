@@ -9,34 +9,83 @@ const { applyEntry } = require('./apply');
 const { resolveFiles } = require('./files');
 const { deepFreeze } = require('./utils');
 
+/* ------------------------------------------------------------------ */
+/*  Internal helpers (shared pipeline)                                 */
+/* ------------------------------------------------------------------ */
+
 /**
- * Build a new parsing state container.
- * @returns {{values: object, origins: object, seenPerFile: Map<string, Set<string>>}}
+ * Create a fresh processing state container.
+ * @returns {{values: object, raw: object, origins: object, seenPerFile: Map}}
  */
-function buildState()
+function createState()
 {
     return {
         values: {},
+        raw: {},
         origins: {},
-        seenPerFile: new Map()
+        seenPerFile: new Map(),
     };
 }
 
 /**
- * Export parsed values to process.env if enabled.
+ * Normalize user options into a consistent internal format.
+ * @param {object} options - Raw user options.
+ * @returns {object} Normalized processing options.
+ */
+function normalizeOptions(options)
+{
+    return {
+        schema: normalizeSchema(options.schema),
+        cast: normalizeCast(options.cast),
+        strict: Boolean(options.strict),
+        freeze: options.freeze !== false,
+        onWarning: options.onWarning,
+        debug: options.debug,
+    };
+}
+
+/**
+ * Process a block of .menv text into the state.
+ * @param {object} state
+ * @param {string} text
+ * @param {string} filePath
+ * @param {object} opts - Normalized options.
+ */
+function processText(state, text, filePath, opts)
+{
+    const entries = parseEntries(text, { strict: opts.strict, filePath });
+    for (const entry of entries)
+    {
+        applyEntry(state, entry, opts, filePath);
+    }
+}
+
+/**
+ * Apply schema defaults and optionally deep-freeze the result.
+ * @param {object} state
+ * @param {object} opts - Normalized options.
+ */
+function finalizeState(state, opts)
+{
+    applySchemaDefaults(state.values, state.origins, opts.schema, opts.strict);
+    if (opts.freeze) deepFreeze(state.values);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Side-effect helpers                                                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Write parsed values to process.env when enabled.
  * @param {object} values
- * @param {object} options
- * @returns {void}
+ * @param {object} options - Raw user options.
  */
 function exportToEnv(values, options)
 {
     if (!options.exportEnv) return;
     for (const [key, value] of Object.entries(values))
     {
-        if (!options.override && Object.prototype.hasOwnProperty.call(process.env, key))
-        {
-            continue;
-        }
+        if (!options.override && Object.prototype.hasOwnProperty.call(process.env, key)) continue;
         process.env[key] = value === undefined ? '' : String(value);
     }
 }
@@ -44,105 +93,69 @@ function exportToEnv(values, options)
 /**
  * Attach parsed values to process.menv unless disabled.
  * @param {object} values
- * @param {object} options
- * @returns {void}
+ * @param {object} options - Raw user options.
  */
 function attachToProcess(values, options)
 {
-    if (options.attach === false) return;
-    process.menv = values;
+    if (options.attach !== false) process.menv = values;
 }
 
+/* ------------------------------------------------------------------ */
+/*  Public API                                                         */
+/* ------------------------------------------------------------------ */
+
 /**
- * Load .menv files and return parsed values with origins.
- * @param {object} options
- * @returns {{parsed: object, origins: object, files: string[]}}
+ * Load .menv files, merge, parse, and validate.
+ * @param {object} [options]
+ * @returns {{parsed: object, raw: object, origins: object, files: string[]}}
  */
 function load(options = {})
 {
-    const normalizedSchema = normalizeSchema(options.schema);
-    const cast = normalizeCast(options.cast);
-    const strict = Boolean(options.strict);
-
-    const state = buildState();
-    const files = resolveFiles(options);
+    const opts = normalizeOptions(options);
+    const state = createState();
+    const filePaths = resolveFiles(options);
     const readFiles = [];
 
-    for (const filePath of files)
+    for (const filePath of filePaths)
     {
         if (!fs.existsSync(filePath)) continue;
-        const text = fs.readFileSync(filePath, 'utf8');
-        const entries = parseEntries(text, { strict, filePath });
-        for (const entry of entries)
-        {
-            applyEntry(state, entry, {
-                schema: normalizedSchema,
-                strict,
-                cast,
-                onWarning: options.onWarning,
-                debug: options.debug
-            }, filePath);
-        }
+        processText(state, fs.readFileSync(filePath, 'utf8'), filePath, opts);
         readFiles.push(filePath);
     }
 
-    applySchemaDefaults(state.values, state.origins, normalizedSchema, strict);
+    finalizeState(state, opts);
     exportToEnv(state.values, options);
-
-    if (options.freeze !== false)
-    {
-        deepFreeze(state.values);
-    }
-
     attachToProcess(state.values, options);
 
     return {
         parsed: state.values,
+        raw: state.raw,
         origins: state.origins,
-        files: readFiles
+        files: readFiles,
     };
 }
 
 /**
- * Parse a string containing .menv content.
+ * Parse a string of .menv content without loading files.
  * @param {string} text
- * @param {object} options
- * @returns {{parsed: object, origins: object, files: string[]}}
+ * @param {object} [options]
+ * @returns {{parsed: object, raw: object, origins: object, files: string[]}}
  */
 function parse(text, options = {})
 {
-    const normalizedSchema = normalizeSchema(options.schema);
-    const cast = normalizeCast(options.cast);
-    const strict = Boolean(options.strict);
-    const state = buildState();
+    const opts = normalizeOptions(options);
+    const state = createState();
     const filePath = options.filePath || '<inline>';
 
-    const entries = parseEntries(text, { strict, filePath });
-    for (const entry of entries)
-    {
-        applyEntry(state, entry, {
-            schema: normalizedSchema,
-            strict,
-            cast,
-            onWarning: options.onWarning
-        }, filePath);
-    }
-
-    applySchemaDefaults(state.values, state.origins, normalizedSchema, strict);
-
-    if (options.freeze !== false)
-    {
-        deepFreeze(state.values);
-    }
+    processText(state, text, filePath, opts);
+    finalizeState(state, opts);
 
     return {
         parsed: state.values,
+        raw: state.raw,
         origins: state.origins,
-        files: options.filePath ? [options.filePath] : []
+        files: options.filePath ? [options.filePath] : [],
     };
 }
 
-module.exports = {
-    load,
-    parse
-};
+module.exports = { load, parse };

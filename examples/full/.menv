@@ -1,0 +1,12 @@
+# .menv — Base configuration (shared across all environments)
+PORT=3000
+HOST=0.0.0.0
+DEBUG=false
+SERVICE_URL=https://api.example.com
+DATABASE_URL=postgres://localhost:5432/myapp
+TIMEOUT=30.5
+ENABLE_CACHE=TRUE
+ALLOWED_IPS=["127.0.0.1","10.0.0.1"]
+META={"region":"us-east-1","tier":"free"}
+LAUNCH_DATE=2026-06-15
+SECRET_KEY="s3cr3t-k3y#with-special!chars"

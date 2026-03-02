@@ -1,0 +1,6 @@
+# .menv.dev — Development profile overrides
+DEBUG=true
+PORT=8080
+SERVICE_URL=https://api.dev.example.com
+DATABASE_URL=postgres://localhost:5432/myapp_dev
+LAUNCH_DATE=2026-09-01

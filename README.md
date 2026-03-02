@@ -1,4 +1,10 @@
-# molex-env-npm
+<p align="center">
+  <img src="docs/images/logo.svg" alt="molex-env logo" width="120" height="120">
+</p>
+
+<h1 align="center">molex-env-npm</h1>
+
+<p align="center">
 
 [![npm version](https://img.shields.io/npm/v/molex-env)](https://www.npmjs.com/package/molex-env)
 [![npm downloads](https://img.shields.io/npm/dm/molex-env.svg)](https://www.npmjs.com/package/molex-env)
@@ -6,6 +12,8 @@
 [![License: MIT](https://img.shields.io/npm/l/molex-env)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D14-brightgreen.svg)](https://nodejs.org)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-success.svg)](package.json)
+
+</p>
 
 > **Native .menv environment loader with profile support, typed parsing, origin tracking, and live reload. Zero dependencies.**
 
@@ -50,7 +58,7 @@ const result = load({
 
 console.log(result.parsed.PORT);              // 3000 (number)
 console.log(result.parsed.DEBUG);             // false (boolean)
-console.log(result.origins.SERVICE_URL);      // { file: '.menv', line: 3 }
+console.log(result.origins.SERVICE_URL);      // { file: '.menv', line: 3, raw: 'https://api.example.com' }
 console.log(process.menv.METADATA.region);    // 'us-east-1' (parsed JSON)
 ```
 
@@ -180,9 +188,9 @@ Load, merge, parse, and validate .menv files. This is the primary method you'll 
 ```javascript
 {
   parsed: Object,   // Typed configuration values
-  raw: Object,      // Raw string values before parsing
-  origins: Object,  // Source tracking: { KEY: { file, line } }
-  files: Array      // List of resolved file paths
+  raw: Object,      // Raw string values before type casting
+  origins: Object,  // Source tracking: { KEY: { file, line, raw } }
+  files: Array      // List of resolved file paths that were read
 }
 ```
 
@@ -230,6 +238,8 @@ Parse a string of .menv content without loading files. Useful for testing or pro
 | `strict` | `boolean` | `false` | Enable strict validation (rejects unknown keys, within-file duplicates, invalid lines) |
 | `cast` | `boolean\|Object` | `true` | Enable/disable type casting |
 | `freeze` | `boolean` | `true` | Deep-freeze the result |
+| `filePath` | `string` | `'<inline>'` | Virtual file path used in origin tracking and error messages |
+| `onWarning` | `Function` | `undefined` | Callback for non-strict warnings (e.g., within-string duplicates) |
 
 > **Note:** The `parse()` function processes a single string, so the `debug` option for file precedence and cross-file features don't apply here.
 
@@ -238,8 +248,9 @@ Parse a string of .menv content without loading files. Useful for testing or pro
 ```javascript
 {
   parsed: Object,   // Typed values
-  raw: Object,      // Raw string values
-  origins: Object   // Line numbers: { KEY: { line } }
+  raw: Object,      // Raw string values before type casting
+  origins: Object,  // Source tracking: { KEY: { file, line, raw } }
+  files: Array      // Contains [filePath] if filePath option was set, otherwise []
 }
 ```
 
@@ -266,7 +277,7 @@ const result = parse(envContent, {
 console.log(result.parsed.PORT);       // 3000 (number)
 console.log(result.parsed.DEBUG);      // true (boolean)
 console.log(result.parsed.METADATA);   // { env: 'production' } (object)
-console.log(result.origins.PORT);      // { line: 2 }
+console.log(result.origins.PORT);      // { file: '<inline>', line: 2, raw: '3000' }
 ```
 
 ---
@@ -599,9 +610,9 @@ const result = load({ profile: 'prod' });
 
 console.log(result.origins);
 // {
-//   PORT: { file: '.menv', line: 1 },
-//   DEBUG: { file: '.menv.local', line: 2 },
-//   SERVICE_URL: { file: '.menv.prod', line: 3 }
+//   PORT: { file: '.menv', line: 1, raw: '3000' },
+//   DEBUG: { file: '.menv.local', line: 2, raw: 'false' },
+//   SERVICE_URL: { file: '.menv.prod', line: 3, raw: 'https://api.production.com' }
 // }
 
 // Debug where a value came from
@@ -791,10 +802,10 @@ Production:    .menv + .menv.prod + .menv.prod.local
 
 ## Example Project
 
-A complete example application is included in `examples/basic`.
+A complete example application is included in `examples/full`.
 
 ```bash
-cd examples/basic
+cd examples/full
 npm install
 npm start
 ```
@@ -886,4 +897,4 @@ console.log(result.origins.PORT);  // { file: '.menv.prod', line: 1, raw: '8080'
 
 ## License
 
-ISC License
+MIT License

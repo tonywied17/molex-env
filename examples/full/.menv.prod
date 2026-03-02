@@ -1,0 +1,7 @@
+# .menv.prod — Production profile overrides
+DEBUG=false
+PORT=443
+SERVICE_URL=https://api.production.com
+DATABASE_URL=postgres://prod-server:5432/myapp_prod
+ENABLE_CACHE=TRUE
+META={"region":"us-east-1","tier":"premium"}

@@ -1,4 +1,0 @@
-DEBUG=true
-START_DATE=2026-02-02
-PORT=8080
-SERVICE_URL=https://api.dev.example.local
